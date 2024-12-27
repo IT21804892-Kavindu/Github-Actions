@@ -1,0 +1,41 @@
+name: Update README on Pull Request
+
+on:
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Set up Git
+      - name: Set up Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      # Update README
+      - name: Update README file
+        run: |
+          # Update README logic here
+          echo "This README was updated by a GitHub Actions workflow" >> README.md
+          git checkout ${{ github.head_ref }}
+          git add README.md
+          git commit -m "Update README via GitHub Actions"
+          git push origin ${{ github.head_ref }}
+
+      # Comment on Pull Request
+      - name: Comment on Pull Request
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.payload.pull_request.number,
+              body: "The README.md file has been updated automatically in the branch `${{ github.head_ref }}`."
+            })
